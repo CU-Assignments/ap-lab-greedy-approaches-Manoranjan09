@@ -1,0 +1,37 @@
+class Solution {
+public:
+    int maxTaskAssign(vector<int>& tasks, vector<int>& workers, int pills, int strength) {
+        sort(tasks.begin(), tasks.end());
+        sort(workers.rbegin(), workers.rend());
+        
+        int left = 0, right = min(tasks.size(), workers.size());
+        while (left < right) {
+            int mid = (left + right + 1) / 2;
+            if (canComplete(tasks, workers, pills, strength, mid)) {
+                left = mid;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+    
+private:
+    bool canComplete(vector<int>& tasks, vector<int>& workers, int pills, int strength, int numTasks) {
+        multiset<int> availableWorkers(workers.begin(), workers.begin() + numTasks);
+        
+        for (int i = numTasks - 1; i >= 0; --i) {
+            auto it = availableWorkers.lower_bound(tasks[i]);
+            if (it != availableWorkers.end()) {
+                availableWorkers.erase(it);
+            } else {
+                if (pills == 0) return false;
+                it = availableWorkers.lower_bound(tasks[i] - strength);
+                if (it == availableWorkers.end()) return false;
+                availableWorkers.erase(it);
+                --pills;
+            }
+        }
+        return true; 
+    }
+};
